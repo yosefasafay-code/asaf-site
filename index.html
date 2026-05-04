@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asaf</title>
+  <meta name="description" content="Asaf — building things on the internet.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎨</text></svg>">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300;9..144,500;9..144,900;9..144,900&family=Inter:wght@300;400;500;700&family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      /* Palette extracted from the portrait */
+      --canvas: #0d0a14;          /* deep purple-black canvas */
+      --canvas-2: #1a1224;
+      --warm: #e8b478;            /* warm cream highlight */
+      --warm-bright: #f4d4a3;
+      --orange: #e07a3a;
+      --orange-bright: #f59640;
+      --magenta: #b83870;
+      --magenta-bright: #d94884;
+      --blue: #3a7dba;
+      --blue-bright: #5a9fd4;
+      --gold: #d4a04a;
+
+      --ink: #f0e8d8;             /* warm off-white text */
+      --ink-dim: #8a7e6e;          /* muted */
+      --ink-soft: #c4b8a4;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    html[lang="he"] body {
+      font-family: 'Heebo', sans-serif;
+    }
+
+    /* Layered painterly background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 30%, rgba(184, 56, 112, 0.18), transparent 60%),
+        radial-gradient(ellipse 60% 80% at 80% 70%, rgba(58, 125, 186, 0.15), transparent 60%),
+        radial-gradient(ellipse 50% 50% at 60% 20%, rgba(224, 122, 58, 0.12), transparent 70%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Canvas texture overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.6 0 0 0 0 0.5 0 0 0 0 0.4 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+      opacity: 0.06;
+      pointer-events: none;
+      z-index: 2;
+      mix-blend-mode: overlay;
+    }
+
+    /* Topbar */
+    .topbar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 32px 48px;
+      font-size: 12px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+    }
+
+    .logo {
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-style: italic;
+      font-size: 22px;
+      letter-spacing: 0.02em;
+      text-transform: none;
+      color: var(--ink);
+    }
+
+    .logo .dot {
+      color: var(--orange-bright);
+      margin: 0 2px;
+    }
+
+    .lang-toggle {
+      background: transparent;
+      border: 1px solid var(--ink-dim);
+      color: var(--ink-soft);
+      padding: 9px 20px;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.25em;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      border-radius: 999px;
+    }
+
+    .lang-toggle:hover {
+      border-color: var(--warm);
+      color: var(--warm);
+      background: rgba(232, 180, 120, 0.05);
+    }
+
+    /* Hero - asymmetric layout */
+    .hero {
+      position: relative;
+      z-index: 10;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 48px 80px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      min-height: calc(100vh - 100px);
+    }
+
+    /* Portrait side */
+    .portrait-wrap {
+      position: relative;
+      animation: fade-up 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .portrait-wrap::before {
+      content: '';
+      position: absolute;
+      inset: -40px;
+      background: radial-gradient(circle at 30% 30%,
+        rgba(232, 180, 120, 0.25) 0%,
+        rgba(184, 56, 112, 0.15) 30%,
+        transparent 70%);
+      filter: blur(40px);
+      animation: aura 6s ease-in-out infinite;
+      z-index: -1;
+    }
+
+    .portrait {
+      position: relative;
+      width: 100%;
+      max-width: 560px;
+      aspect-ratio: 1;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(232, 180, 120, 0.15),
+        0 0 60px rgba(184, 56, 112, 0.2);
+      transform: rotate(-1.5deg);
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .portrait:hover {
+      transform: rotate(0deg) scale(1.02);
+    }
+
+    .portrait img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Decorative tape effect */
+    .portrait::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%) rotate(2deg);
+      width: 100px;
+      height: 24px;
+      background: rgba(244, 212, 163, 0.4);
+      backdrop-filter: blur(2px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      z-index: 5;
+    }
+
+    /* Signature mark */
+    .signature {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--warm-bright);
+      opacity: 0.85;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+      transform: rotate(-3deg);
+      animation: fade-in 1.5s 1.2s both;
+    }
+
+    @keyframes aura {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.1); }
+    }
+
+    /* Text side */
+    .text-block {
+      position: relative;
+      animation: fade-up 1.4s 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .greeting {
+      display: inline-block;
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 32px;
+      color: var(--ink-soft);
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+
+    .greeting::before {
+      content: '— ';
+      color: var(--orange-bright);
+    }
+
+    .name {
+      display: block;
+      font-family: 'Fraunces', serif;
+      font-weight: 900;
+      font-size: clamp(80px, 14vw, 200px);
+      line-height: 0.85;
+      letter-spacing: -0.04em;
+      margin-bottom: 32px;
+      background: linear-gradient(
+        135deg,
+        var(--warm-bright) 0%,
+        var(--orange-bright) 25%,
+        var(--magenta-bright) 60%,
+        var(--blue-bright) 100%
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 4px 30px rgba(244, 150, 64, 0.25));
+    }
+
+    html[lang="he"] .name {
+      font-family: 'Heebo', sans-serif;
+      font-weight: 900;
+      font-size: clamp(72px, 12vw, 180px);
+    }
+
+    .bio {
+      font-size: 17px;
+      line-height: 1.7;
+      color: var(--ink-soft);
+      max-width: 460px;
+      font-weight: 300;
+      margin-bottom: 40px;
+    }
+
+    .bio strong {
+      color: var(--warm-bright);
+      font-weight: 500;
+    }
+
+    /* CTA */
+    .cta-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 16px 32px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    html[lang="he"] .btn {
+      font-family: 'Heebo', sans-serif;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--orange-bright), var(--magenta-bright));
+      color: var(--canvas);
+      box-shadow: 0 8px 30px rgba(224, 122, 58, 0.35);
+      border: none;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(224, 122, 58, 0.5);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--ink-dim);
+      color: var(--ink);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--warm);
+      color: var(--warm);
+      background: rgba(232, 180, 120, 0.08);
+    }
+
+    /* Decorative ornament — paint splatter dots */
+    .ornament {
+      position: absolute;
+      pointer-events: none;
+    }
+    .ornament-1 {
+      top: 10%; right: 5%;
+      width: 8px; height: 8px;
+      background: var(--orange-bright);
+      border-radius: 50%;
+      filter: blur(1px);
+      opacity: 0.7;
+    }
+    .ornament-2 {
+      top: 30%; left: 8%;
+      width: 14px; height: 14px;
+      background: var(--magenta-bright);
+      border-radius: 50%;
+      filter: blur(2px);
+      opacity: 0.5;
+    }
+    .ornament-3 {
+      bottom: 20%; right: 10%;
+      width: 10px; height: 10px;
+      background: var(--blue-bright);
+      border-radius: 50%;
+      filter: blur(1px);
+      opacity: 0.6;
+    }
+
+    /* Footer */
+    .footer {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 32px;
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      color: var(--ink-dim);
+      text-transform: uppercase;
+    }
+
+    .footer .heart {
+      color: var(--magenta-bright);
+    }
+
+    /* Animations */
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to { opacity: 0.85; }
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .hero {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        text-align: center;
+        padding: 40px 24px 60px;
+      }
+
+      .portrait-wrap {
+        max-width: 400px;
+        margin: 0 auto;
+      }
+
+      .greeting::before {
+        display: none;
+      }
+
+      .bio {
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .cta-row {
+        justify-content: center;
+      }
+
+      .topbar {
+        padding: 20px 24px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .name {
+        font-size: 72px;
+      }
+      .greeting {
+        font-size: 24px;
+      }
+      .bio {
+        font-size: 15px;
+      }
+    }
+
+    /* RTL adjustments */
+    html[dir="rtl"] .greeting::before {
+      content: '';
+    }
+    html[dir="rtl"] .greeting::after {
+      content: ' —';
+      color: var(--orange-bright);
+    }
+    html[dir="rtl"] .portrait {
+      transform: rotate(1.5deg);
+    }
+    html[dir="rtl"] .portrait:hover {
+      transform: rotate(0deg) scale(1.02);
+    }
+  </style>
+</head>
+<body>
+  <span class="ornament ornament-1"></span>
+  <span class="ornament ornament-2"></span>
+  <span class="ornament ornament-3"></span>
+
+  <header class="topbar">
+    <div class="logo">Asaf<span class="dot">.</span></div>
+    <button class="lang-toggle" id="langToggle">עברית</button>
+  </header>
+
+  <main class="hero">
+    <div class="portrait-wrap">
+      <div class="portrait">
+        <img src="avatar.png" alt="Asaf — portrait">
+        <div class="signature">Asaf '26</div>
+      </div>
+    </div>
+
+    <div class="text-block">
+      <span class="greeting" data-en="Hello, I'm" data-he="שלום, אני">Hello, I'm</span>
+      <h1 class="name">Asaf</h1>
+      <p class="bio"
+         data-en="A full-stack developer who builds things on the internet. Currently <strong>under construction</strong> — much like this site."
+         data-he="מפתח פול-סטאק שבונה דברים באינטרנט. כרגע <strong>בבנייה</strong> — בדיוק כמו האתר הזה.">
+        A full-stack developer who builds things on the internet. Currently <strong>under construction</strong> — much like this site.
+      </p>
+
+      <div class="cta-row">
+        <a href="mailto:hello@example.com" class="btn btn-primary"
+           data-en="Get in touch →" data-he="צור קשר →">Get in touch →</a>
+        <a href="https://github.com" target="_blank" rel="noopener" class="btn btn-ghost"
+           data-en="GitHub" data-he="GitHub">GitHub</a>
+      </div>
+    </div>
+  </main>
+
+  <div class="footer" data-en="Made with <span class='heart'>♥</span> in Tel Aviv · 2026"
+       data-he="נוצר עם <span class='heart'>♥</span> בתל אביב · 2026">
+    Made with <span class="heart">♥</span> in Tel Aviv · 2026
+  </div>
+
+  <script>
+    const langToggle = document.getElementById('langToggle');
+    const html = document.documentElement;
+
+    function setLang(lang) {
+      const isHe = lang === 'he';
+      html.lang = lang;
+      html.dir = isHe ? 'rtl' : 'ltr';
+      langToggle.textContent = isHe ? 'EN' : 'עברית';
+      document.title = isHe ? 'אסף' : 'Asaf';
+
+      document.querySelectorAll('[data-en]').forEach(el => {
+        el.innerHTML = isHe ? el.dataset.he : el.dataset.en;
+      });
+      localStorage.setItem('lang', lang);
+    }
+
+    langToggle.addEventListener('click', () => {
+      setLang(html.lang === 'he' ? 'en' : 'he');
+    });
+
+    const savedLang = localStorage.getItem('lang');
+    if (savedLang) setLang(savedLang);
+    else if (navigator.language.startsWith('he')) setLang('he');
+
+    // Subtle parallax on the portrait
+    const portrait = document.querySelector('.portrait');
+    document.addEventListener('mousemove', (e) => {
+      if (window.innerWidth < 900) return;
+      const x = (e.clientX / window.innerWidth - 0.5) * 8;
+      const y = (e.clientY / window.innerHeight - 0.5) * 8;
+      portrait.style.transform = `rotate(${html.dir === 'rtl' ? 1.5 : -1.5}deg) translate(${x}px, ${y}px)`;
+    });
+  </script>
+</body>
+</html>
